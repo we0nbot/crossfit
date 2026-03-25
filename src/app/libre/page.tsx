@@ -13,7 +13,7 @@ import {
   Flame,
   Shield
 } from "lucide-react";
-import Link from "next/link";
+import Navbar from "@/components/Navbar";
 import EliteTimer from "@/components/EliteTimer";
 
 interface WodTemplate {
@@ -83,32 +83,7 @@ export default function FreeTrainingPage() {
 
       <div className="relative z-10 max-w-2xl mx-auto min-h-screen flex flex-col">
         
-        {/* Header - Identidad */}
-        <header className="px-6 py-8 flex items-center justify-between border-b border-white/5 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-emerald-500 transition-colors">
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <div>
-              <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest italic">Open Gym / Libre</p>
-              <h1 className="text-xl font-black italic uppercase tracking-tighter">Rorro<span className="text-emerald-500">Box</span></h1>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link 
-              href="/hipertrofia"
-              className="flex items-center gap-2 px-3 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-full hover:bg-cyan-500/20 transition-all group"
-            >
-              <Zap className="w-3.5 h-3.5 text-cyan-500 group-hover:scale-110 transition-transform" />
-              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-cyan-500">
-                Pump
-              </span>
-            </Link>
-            <div className="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg">
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Session V.1</span>
-            </div>
-          </div>
-        </header>
+        <Navbar />
 
         <main className="flex-grow p-6 space-y-8">
           

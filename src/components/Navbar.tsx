@@ -20,6 +20,16 @@ export default function Navbar() {
         </div>
       );
     }
+    if (pathname === "/libre") {
+      return (
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-[#111] border border-[#222] rounded-full">
+          <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+          <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-[#555]">
+            Open Gym
+          </span>
+        </div>
+      );
+    }
     if (pathname === "/nutricion") {
       return (
         <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full">
