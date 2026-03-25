@@ -89,7 +89,7 @@ export default function EliteTimer({ type, initialSeconds, onTimeChange, onStop 
 
       {/* Reloj con Tipografía Fluida (Clamp) */}
       <div className="w-full flex justify-center items-center overflow-hidden mb-10 relative z-10">
-        <div className={`text-[clamp(1.5rem,5vw,3rem)] font-black font-mono tabular-nums tracking-tighter italic leading-none transition-all duration-500 ${isRunning ? 'text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]' : 'text-slate-800'
+        <div className={`text-[clamp(3rem,5vw,4rem)] font-black font-mono tabular-nums tracking-tighter italic leading-none transition-all duration-500 ${isRunning ? 'text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]' : 'text-slate-800'
           }`}>
           {format(totalCentis)}
         </div>
