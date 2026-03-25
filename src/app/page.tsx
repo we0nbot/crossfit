@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Dumbbell, Activity } from "lucide-react";
+import { Dumbbell, Activity, Apple } from "lucide-react";
 import Link from "next/link";
 import EliteTimer from "@/components/EliteTimer";
 import LevelSelector from "@/components/LevelSelector";
@@ -88,6 +88,15 @@ export default function AthleteDashboard() {
             <Activity className="w-3.5 h-3.5 text-cyan-500 group-hover:scale-110 transition-transform" />
             <span className="text-[8px] font-black uppercase tracking-[0.2em] text-cyan-500">
               Pump
+            </span>
+          </Link>
+          <Link
+            href="/nutricion"
+            className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full hover:bg-amber-500/20 transition-all group"
+          >
+            <Apple className="w-3.5 h-3.5 text-amber-500 group-hover:scale-110 transition-transform" />
+            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-amber-500">
+              Nutri
             </span>
           </Link>
           <div className="flex items-center gap-2 px-3 py-1.5 bg-[#111] border border-[#222] rounded-full">
