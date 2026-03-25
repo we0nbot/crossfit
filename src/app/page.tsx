@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Dumbbell, Activity } from "lucide-react";
+import Link from "next/link";
 import EliteTimer from "@/components/EliteTimer";
 import LevelSelector from "@/components/LevelSelector";
 import DynamicRegister from "@/components/DynamicRegister";
@@ -70,11 +71,31 @@ export default function AthleteDashboard() {
             Rorro<span className="text-emerald-500">Box</span>
           </span>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-[#111] border border-[#222] rounded-full">
-          <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-          <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-[#555]">
-            Live Session
-          </span>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/libre"
+            className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full hover:bg-emerald-500/20 transition-all group"
+          >
+            <Dumbbell className="w-3.5 h-3.5 text-emerald-500 group-hover:scale-110 transition-transform" />
+            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-500">
+              Libre
+            </span>
+          </Link>
+          <Link
+            href="/hipertrofia"
+            className="flex items-center gap-2 px-3 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-full hover:bg-cyan-500/20 transition-all group"
+          >
+            <Activity className="w-3.5 h-3.5 text-cyan-500 group-hover:scale-110 transition-transform" />
+            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-cyan-500">
+              Pump
+            </span>
+          </Link>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#111] border border-[#222] rounded-full">
+            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-[#555]">
+              Live Session
+            </span>
+          </div>
         </div>
       </header>
 
@@ -82,6 +103,9 @@ export default function AthleteDashboard() {
 
         {/* ── HERO ── */}
         <section className="px-5 pt-8">
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#555] mb-2">
+            WOD del Día • <span className="text-emerald-500">¡COOL DOWN!</span>
+          </p>
           <div
             className="inline-flex items-center px-3 py-1 bg-emerald-500 text-white text-[9px] font-black italic uppercase tracking-[0.15em] mb-4"
             style={{ clipPath: "polygon(0 0,calc(100% - 6px) 0,100% 50%,calc(100% - 6px) 100%,0 100%,6px 50%)" }}
@@ -157,7 +181,7 @@ export default function AthleteDashboard() {
 
       <footer className="px-5 py-8 text-center border-t border-[#111]">
         <p className="text-[9px] font-bold uppercase tracking-[0.4em] text-[#333] italic">
-          RorroBox Industrial · Curicó Archive
+          RorroBox Industrial · <a href="https://instagram.com/rorrofx" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-500 transition-colors">@rorrofx</a> · Curicó Archive
         </p>
       </footer>
     </div>
