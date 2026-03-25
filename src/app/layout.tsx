@@ -13,8 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RorroBox",
-  description: "Gestión de Rendimiento - Box Curicó",
+  title: {
+    default: "RorroBox",
+    template: "%s | RorroBox",
+  },
+  description: "Gestión de Rendimiento y Programación de CrossFit - Box Curicó",
   manifest: "/manifest.json",
   themeColor: "#020617",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0",
@@ -25,6 +28,28 @@ export const metadata: Metadata = {
   },
   icons: {
     apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    title: "RorroBox Training",
+    description: "Eleva tu rendimiento con la programación técnica de RorroBox.",
+    url: "https://rorrobox.vercel.app",
+    siteName: "RorroBox",
+    images: [
+      {
+        url: "/icon-512x512.png",
+        width: 512,
+        height: 512,
+        alt: "RorroBox Digital",
+      },
+    ],
+    locale: "es_CL",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "RorroBox",
+    description: "Plataforma de Alto Rendimiento para Atletas.",
+    images: ["/icon-512x512.png"],
   },
 };
 
