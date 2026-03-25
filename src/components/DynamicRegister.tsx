@@ -37,6 +37,17 @@ export default function DynamicRegister({
     setLocalLevel(selectedLevel as any);
   }, [selectedLevel]);
 
+  // Auto-Fill Inteligente: Capturar tiempo del cronómetro (v15.8)
+  React.useEffect(() => {
+    if (currentTime && currentTime !== "00:00:00") {
+      const timeField = fields.find(f => 
+        f.toLowerCase().includes("tiempo") || f.toLowerCase().includes("time")
+      );
+      if (timeField) {
+        setFormData(prev => ({ ...prev, [timeField]: currentTime }));
+      }
+    }
+  }, [currentTime, fields]);
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const missing = fields.filter(

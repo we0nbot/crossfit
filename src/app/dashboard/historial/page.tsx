@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { sheets } from "@/lib/google";
 import Link from "next/link";
 import { 
@@ -69,7 +71,7 @@ export default async function HistorialPage() {
           {wods.length > 0 ? wods.map((wod, i) => (
             <Link 
               key={i} 
-              href={`/dashboard?date=${wod.fecha.split('-').reverse().join('-')}`} // Convierte DD-MM-YYYY a YYYY-MM-DD para el input
+              href={`/dashboard?date=${(wod.fecha || "").split('-').reverse().join('-') || ""}`} // Convierte DD-MM-YYYY a YYYY-MM-DD para el input con fallback seguro
               className="group block bg-slate-950 border-4 border-slate-900 p-8 rounded-[2.5rem] hover:border-emerald-500/30 transition-all duration-500 relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-125 transition-transform duration-700">

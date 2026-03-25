@@ -7,13 +7,14 @@ interface EliteTimerProps {
   type: 'STOPWATCH' | 'COUNTDOWN';
   initialSeconds: number;
   onTimeChange?: (currentMs: number) => void;
+  onStop?: (formattedTime: string) => void;
 }
 
 /**
- * EliteTimer V3.1 - Edición Anti-Corte.
- * Implementa tipografía fluida y contenedores responsivos para evitar desbordamientos.
+ * EliteTimer V3.2 - Edición Sincronizada.
+ * Añade la capacidad de emitir el resultado final al detenerse.
  */
-export default function EliteTimer({ type, initialSeconds, onTimeChange }: EliteTimerProps) {
+export default function EliteTimer({ type, initialSeconds, onTimeChange, onStop }: EliteTimerProps) {
   const [totalCentis, setTotalCentis] = useState(type === 'COUNTDOWN' ? initialSeconds * 100 : 0);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -97,7 +98,13 @@ export default function EliteTimer({ type, initialSeconds, onTimeChange }: Elite
       {/* Controles Adaptativos */}
       <div className="flex gap-3 md:gap-6 relative z-10">
         <button
-          onClick={() => setIsRunning(!isRunning)}
+          onClick={() => {
+            const nextRunning = !isRunning;
+            setIsRunning(nextRunning);
+            if (!nextRunning && onStop) {
+              onStop(format(totalCentis));
+            }
+          }}
           className={`flex-grow py-5 rounded-2xl font-black text-base md:text-xl uppercase italic tracking-widest transition-all active:scale-95 flex items-center justify-center gap-3 ${isRunning
             ? 'bg-slate-900 text-white border border-slate-800'
             : 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'

@@ -4,8 +4,8 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userId, wodId, nivel, results } = body;
-
+    const { userId, wodId: rawWodId, nivel, results } = body;
+    const wodId = rawWodId ? rawWodId.toString().trim().toUpperCase() : "";
     if (!userId || !wodId || !nivel) {
       return NextResponse.json(
         { error: "Fallo de Integridad: Datos Requeridos" },

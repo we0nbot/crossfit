@@ -15,7 +15,7 @@ interface FocusFlowViewProps {
 
 export default function FocusFlowView({ wod, athleteId }: FocusFlowViewProps) {
   const [activeLevel, setActiveLevel] = useState<"RX" | "SCALED" | "NOVATO">("SCALED");
-
+  const [capturedTime, setCapturedTime] = useState("00:00:00");
   const today = new Intl.DateTimeFormat("es-CL", {
     day: "2-digit",
     month: "2-digit",
@@ -79,6 +79,7 @@ export default function FocusFlowView({ wod, athleteId }: FocusFlowViewProps) {
           <EliteTimer
             type={wod.config?.timerType || "STOPWATCH"}
             initialSeconds={wod.config?.timerValue || 0}
+            onStop={setCapturedTime}
           />
         </section>
 
@@ -129,7 +130,7 @@ export default function FocusFlowView({ wod, athleteId }: FocusFlowViewProps) {
             wodId={wod.id_wod || wod.id}
             userId={athleteId}
             fields={wod.config?.fields || ["tiempo"]}
-            currentTime="00:00:00"
+            currentTime={capturedTime}
             selectedLevel={activeLevel}
             onSuccess={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           />

@@ -5,11 +5,13 @@ import { Dumbbell, Activity } from "lucide-react";
 import EliteTimer from "@/components/EliteTimer";
 import LevelSelector from "@/components/LevelSelector";
 import DynamicRegister from "@/components/DynamicRegister";
+import Leaderboard from "@/components/Leaderboard";
 
 export default function AthleteDashboard() {
   const [wod, setWod] = useState<any>(null);
   const [activeLevel, setActiveLevel] = useState<"RX" | "SCALED" | "NOVATO">("SCALED");
   const [loading, setLoading] = useState(true);
+  const [capturedTime, setCapturedTime] = useState("00:00:00");
 
   useEffect(() => {
     async function fetchWod() {
@@ -107,6 +109,7 @@ export default function AthleteDashboard() {
           <EliteTimer
             type={wod.config?.timerType || "STOPWATCH"}
             initialSeconds={wod.config?.timerValue || 0}
+            onStop={setCapturedTime}
           />
         </section>
 
@@ -135,14 +138,19 @@ export default function AthleteDashboard() {
         </div>
 
         {/* ── REGISTER ── */}
-        <section className="px-5 pt-6 pb-20">
+        <section className="px-5 pt-6">
           <DynamicRegister
-            wodId={wod.id}
+            wodId={wod.id_wod || wod.id}
             userId="ATHLETE_MOCK"
             fields={wod.config?.fields || ["tiempo"]}
-            currentTime="00:00:00"
+            currentTime={capturedTime}
             selectedLevel={activeLevel}
           />
+        </section>
+
+        {/* ── LEADERBOARD ── */}
+        <section className="px-5 pt-6 pb-20">
+          <Leaderboard wodId={wod.id_wod || wod.id} />
         </section>
 
       </main>
