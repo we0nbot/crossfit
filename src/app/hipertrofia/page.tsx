@@ -2,7 +2,29 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Dumbbell, ArrowLeft } from "lucide-react";
+import { Dumbbell, ArrowLeft, PlayCircle, X } from "lucide-react";
+
+// --- MAPEADO TÉCNICO EXERCISEDB (GIFs) ---
+const EXERCISE_MAPPING: Record<string, string> = {
+  "Floor Press pesado": "vtusOWT",
+  "Press Militar estricto": "wdRZISl",
+  "Flexiones en Anillas": "8K7m2SS",
+  "Elevaciones Laterales": "AQ0mC4Y",
+  "Rompecráneos": "h8LFzo9",
+  "Dominadas Lastradas": "72BC5Za",
+  "Pendlay Row": "r0z6xzQ",
+  "Remo a una mano": "xbkPfaw",
+  "Peso Muerto Rumano": "wQ2c4XD",
+  "Press Push/Jerk": "FS63wTN",
+  "Fondos": "J60bN17",
+  "Remo Invertido": "VPPtusI",
+  "Sentadilla Frontal": "Y7YcmIJ",
+  "Zancadas Caminando": "IZVHb27",
+  "Goblet Squat Deficit": "yn8yg1r",
+  "Hip Thrust (Suelo)": "Pjbc0Kt",
+  "Dominadas": "72BC5Za",
+  "Chin-ups": "G97-mID", // Búsqueda aproximada
+};
 
 const hypertrophyPlan = [
   {
@@ -170,13 +192,114 @@ const LoadCalculator = () => {
   );
 };
 
+// --- COMPONENTE GUÍA TÉCNICA (ExerciseDB) ---
+const TechnicalGuide = ({ exerciseName, isOpen, onToggle }: { exerciseName: string, isOpen: boolean, onToggle: () => void }) => {
+  const exerciseId = EXERCISE_MAPPING[exerciseName];
+  if (!exerciseId) return null;
+
+  const gifUrl = `https://static.exercisedb.dev/media/${exerciseId}.gif`;
+
+  return (
+    <div className="mt-4">
+      <button
+        onClick={onToggle}
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${
+          isOpen 
+            ? "bg-red-500/10 text-red-500 border border-red-500/20" 
+            : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20"
+        }`}
+      >
+        {isOpen ? <X className="w-3 h-3" /> : <PlayCircle className="w-3 h-3" />}
+        {isOpen ? "Cerrar Guía" : "Guía Técnica"}
+      </button>
+
+      {isOpen && (
+        <div className="mt-4 rounded-xl overflow-hidden border border-[#222] bg-[#111] animate-in zoom-in-95 duration-200 aspect-square relative group">
+          <div className="absolute inset-0 bg-emerald-500/5 pointer-events-none group-hover:bg-transparent transition-colors" />
+          <img 
+            src={gifUrl} 
+            alt={exerciseName}
+            className="w-full h-full object-cover scale-110 grayscale-[0.3] brightness-90 group-hover:grayscale-0 group-hover:scale-100 transition-all duration-500"
+            loading="lazy"
+          />
+          <div className="absolute bottom-2 left-2 flex items-center gap-2">
+            <span className="bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[8px] font-bold text-emerald-500 border border-emerald-500/20 uppercase tracking-tighter">
+              ExerciseDB Source
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// --- COMPONENTE TARJETA DE EJERCICIO ---
+const ExerciseCard = ({ ex, index, isLast }: { ex: any, index: number, isLast: boolean }) => {
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
+
+  return (
+    <div className={`py-6 space-y-4 animate-in fade-in duration-300 ${!isLast ? "border-b border-[#111]" : ""}`}>
+      {/* Exercise header */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-baseline gap-2">
+          <span className="text-3xl font-black italic text-[#222] leading-none min-w-[28px]">
+            {index + 1}
+          </span>
+          <h3 className="text-lg font-black italic uppercase tracking-tight text-white leading-tight">
+            {ex.name}
+          </h3>
+        </div>
+        <span className="shrink-0 px-2.5 py-1 border border-[#222] bg-[#111] text-[#555] text-[9px] font-bold uppercase tracking-wider rounded whitespace-nowrap">
+          {ex.gear}
+        </span>
+      </div>
+
+      {/* Volumen + Tempo */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="border-l-[3px] border-emerald-500 pl-3">
+          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#555] mb-1">
+            Volumen
+          </p>
+          <p className="font-mono font-bold text-emerald-400 text-sm">
+            {ex.setsReps}
+          </p>
+        </div>
+        <div className="border-l-[3px] border-[#222] pl-3">
+          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#555] mb-1">
+            Tempo
+          </p>
+          <p className="text-[#aaa] text-xs leading-snug">
+            {ex.tempo}
+          </p>
+        </div>
+      </div>
+
+      {/* Notes */}
+      <div className="flex items-start gap-2">
+        <span className="text-[9px] font-black uppercase tracking-wider text-emerald-500 shrink-0 mt-0.5">
+          Foco
+        </span>
+        <p className="text-xs text-[#aaa] leading-relaxed italic">
+          {ex.notes}
+        </p>
+      </div>
+
+      {/* Technical Guide Integration */}
+      <TechnicalGuide 
+        exerciseName={ex.name} 
+        isOpen={isGuideOpen} 
+        onToggle={() => setIsGuideOpen(!isGuideOpen)} 
+      />
+    </div>
+  );
+};
+
 export default function HypertrophyPlan() {
   const [activeTab, setActiveTab] = useState(1);
   const currentDay = hypertrophyPlan.find((d) => d.id === activeTab)!;
 
   return (
     <div className="min-h-screen bg-[#080808] text-white font-sans">
-
       {/* ── HEADER ── */}
       <header className="px-5 py-4 border-b border-[#1a1a1a] flex justify-between items-center bg-[#080808]/90 backdrop-blur-xl sticky top-0 z-50">
         <div className="flex items-center gap-4">
@@ -207,7 +330,6 @@ export default function HypertrophyPlan() {
       </header>
 
       <main className="w-full max-w-md mx-auto flex flex-col">
-
         {/* ── HERO ── */}
         <section className="px-5 pt-8">
           <div
@@ -289,63 +411,14 @@ export default function HypertrophyPlan() {
         {/* ── EXERCISES ── */}
         <section className="px-5 pt-6 pb-20 space-y-0">
           {currentDay.exercises.map((ex, index) => (
-            <div key={index}>
-              <div className="py-5 space-y-4 animate-in fade-in duration-300">
-
-                {/* Exercise header */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black italic text-[#222] leading-none min-w-[28px]">
-                      {index + 1}
-                    </span>
-                    <h3 className="text-lg font-black italic uppercase tracking-tight text-white leading-tight">
-                      {ex.name}
-                    </h3>
-                  </div>
-                  <span className="shrink-0 px-2.5 py-1 border border-[#222] bg-[#111] text-[#555] text-[9px] font-bold uppercase tracking-wider rounded whitespace-nowrap">
-                    {ex.gear}
-                  </span>
-                </div>
-
-                {/* Volumen + Tempo */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="border-l-[3px] border-emerald-500 pl-3">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#555] mb-1">
-                      Volumen
-                    </p>
-                    <p className="font-mono font-bold text-emerald-400 text-sm">
-                      {ex.setsReps}
-                    </p>
-                  </div>
-                  <div className="border-l-[3px] border-[#222] pl-3">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#555] mb-1">
-                      Tempo
-                    </p>
-                    <p className="text-[#aaa] text-xs leading-snug">
-                      {ex.tempo}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Notes */}
-                <div className="flex items-start gap-2">
-                  <span className="text-[9px] font-black uppercase tracking-wider text-emerald-500 shrink-0 mt-0.5">
-                    Foco
-                  </span>
-                  <p className="text-xs text-[#aaa] leading-relaxed italic">
-                    {ex.notes}
-                  </p>
-                </div>
-              </div>
-
-              {/* Exercise divider */}
-              {index < currentDay.exercises.length - 1 && (
-                <div className="h-px bg-[#111]" />
-              )}
-            </div>
+            <ExerciseCard 
+              key={`${activeTab}-${index}`} 
+              ex={ex} 
+              index={index} 
+              isLast={index === currentDay.exercises.length - 1} 
+            />
           ))}
         </section>
-
       </main>
 
       <footer className="px-5 py-8 text-center border-t border-[#111]">
