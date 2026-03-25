@@ -26,12 +26,19 @@ export default function DynamicRegister({
   selectedLevel,
   onSuccess,
 }: DynamicRegisterProps) {
+  const [atleta, setAtleta] = useState("");
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [localLevel, setLocalLevel] = useState<"RX" | "SCALED" | "NOVATO">(
     (selectedLevel as any) || "RX"
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState<{ type: "success" | "error"; msg: string } | null>(null);
+
+  // Carga inicial de datos persistidos
+  React.useEffect(() => {
+    const savedUser = localStorage.getItem("rorrobox_user");
+    if (savedUser) setAtleta(savedUser);
+  }, []);
 
   React.useEffect(() => {
     setLocalLevel(selectedLevel as any);
@@ -48,8 +55,15 @@ export default function DynamicRegister({
       }
     }
   }, [currentTime, fields]);
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!atleta.trim()) {
+      setStatus({ type: "error", msg: "Identifícate: Escribe tu nombre primero" });
+      return;
+    }
+
     const missing = fields.filter(
       (f) => !["nivel", "modalidad", "level"].includes(f.toLowerCase()) && (!formData[f] || !formData[f].trim())
     );
@@ -57,11 +71,17 @@ export default function DynamicRegister({
       setStatus({ type: "error", msg: `Faltan: ${missing.join(", ")}` });
       return;
     }
+
     setIsSubmitting(true);
     setStatus(null);
+
+    // Persistencia local para el próximo WOD
+    localStorage.setItem("rorrobox_user", atleta);
+
     const payload = {
+      atleta, // El nombre del alumno (Fase 16)
       wodId,
-      userId,
+      userId: userId === "ATHLETE_MOCK" ? atleta : userId, // Si es el mock, usamos su nombre
       nivel: localLevel,
       results: { ...formData, tiempo_final: currentTime },
       timestamp: new Date().toISOString(),
@@ -140,8 +160,23 @@ export default function DynamicRegister({
         />
       </div>
 
-      {/* Inputs */}
+      {/* Inputs Dinámicos */}
       <form onSubmit={handleSave} className="space-y-5">
+        
+        {/* Identidad del Atleta (v16.0) */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-500/80">
+            Nombre o Alias
+          </label>
+          <input
+            type="text"
+            placeholder="Ej: Rorro Extreme"
+            className="bg-[#111] border border-[#222] rounded px-4 py-3 text-white text-sm font-semibold placeholder:text-[#333] outline-none focus:border-emerald-500 focus:ring-0 transition-all duration-200 w-full"
+            value={atleta}
+            onChange={(e) => setAtleta(e.target.value)}
+          />
+        </div>
+
         <div className={`grid gap-3 ${visibleFields.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
           {visibleFields.map((field) => (
             <div key={field} className="flex flex-col gap-1.5">
