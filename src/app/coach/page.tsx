@@ -89,7 +89,13 @@ export default async function CoachMainDashboard() {
     const res = await fetch(`${baseUrl}/api/coach/analytics/today`, { cache: 'no-store' });
     if (res.ok) {
       const json = await res.json();
-      histogramData = json.histogram?.map((h: any) => ({ rango: h.rango, atletas: h.atletas })) || [];
+      histogramData = json.histogram?.map((h: any) => ({ 
+        rango: h.rango, 
+        RX: h.RX || 0,
+        SCALED: h.SCALED || 0,
+        NOVATO: h.NOVATO || 0,
+        total: h.total || 0
+      })) || [];
     }
   } catch (e) {
     console.error("Error cargando analíticas:", e);
@@ -136,10 +142,10 @@ export default async function CoachMainDashboard() {
           <div className="space-y-4">
              <div className="flex items-center gap-3">
                 <div className="px-3 py-1 bg-emerald-500 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-md shadow-[0_0_20px_rgba(16,185,129,0.4)]">Live</div>
-                <span className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">Diwau Station / Chile</span>
+                <span className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">RorroBox Station / Chile</span>
              </div>
              <h1 className="text-6xl lg:text-8xl font-black italic uppercase tracking-tighter leading-[0.85] text-white">
-                Box <span className="text-emerald-500 drop-shadow-[0_0_30px_rgba(16,185,129,0.3)]">Monitor</span>
+                Rorro<span className="text-emerald-500 drop-shadow-[0_0_30px_rgba(16,185,129,0.3)]">Box</span>
              </h1>
           </div>
           <div className="flex items-center gap-6 text-right">

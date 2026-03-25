@@ -39,9 +39,9 @@ export async function GET(request: Request) {
       .filter((row) => row[2] === wodId) // Col C: id_wod
       .map((row) => ({
         nombre_usuario: userMap[row[1]] || "Atleta Desconocido", // Col B: id_usuario
-        resultado: row[3], // Col D: resultado (MM:SS:ms)
-        modalidad: row[4], // Col E: modalidad
-        fecha_registro: row[5], // Col F: timestamp
+        resultado: row[4] || "--", // Col E: Resultado Principal (MM:SS / Score)
+        modalidad: row[3], // Col D: modalidad (RX / SCALED / NOVATO)
+        fecha_registro: row[6], // Col G: timestamp
       }));
 
     // 4. Lógica de Ordenamiento y Categorización
@@ -49,20 +49,26 @@ export async function GET(request: Request) {
       a.resultado.localeCompare(b.resultado);
 
     const rxLeaderboard = filteredMetrics
-      .filter((m) => m.modalidad === "Rx")
+      .filter((m) => m.modalidad?.toLowerCase() === "rx")
       .sort(sortByTime)
       .slice(0, 10);
-
+ 
     const scaledLeaderboard = filteredMetrics
-      .filter((m) => m.modalidad === "Scaled")
+      .filter((m) => m.modalidad?.toLowerCase() === "scaled")
       .sort(sortByTime)
       .slice(0, 10);
 
+    const novatoLeaderboard = filteredMetrics
+      .filter((m) => m.modalidad?.toLowerCase() === "novato")
+      .sort(sortByTime)
+      .slice(0, 10);
+ 
     return NextResponse.json({
       wodId,
       leaderboard: {
         rx: rxLeaderboard,
         scaled: scaledLeaderboard,
+        novato: novatoLeaderboard
       },
       metadata: {
         total_records: filteredMetrics.length,

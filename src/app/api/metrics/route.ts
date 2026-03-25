@@ -1,71 +1,44 @@
-import { google } from "googleapis";
+import { sheets } from "@/lib/google";
+import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userId, wodId, data } = body;
+    const { userId, wodId, nivel, results } = body;
 
-    // Validación de grado bancario: Aborto inmediato si faltan identificadores críticos
-    if (!userId || !wodId) {
-      return Response.json(
-        { 
-          error: "Fallo de Integridad: Identificadores Requeridos", 
-          detalle: "wodId y userId son campos de carácter obligatorio para la trazabilidad." 
-        },
+    if (!userId || !wodId || !nivel) {
+      return NextResponse.json(
+        { error: "Fallo de Integridad: Datos Requeridos" },
         { status: 400 }
       );
     }
 
     const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID;
-    const dataString = JSON.stringify(data || {});
     const timestamp = new Date().toISOString();
     const uuid = crypto.randomUUID();
 
-    // Sanitización de la llave privada para el entorno de ejecución
-    const privateKey = process.env.GOOGLE_PRIVATE_KEY
-      ? process.env.GOOGLE_PRIVATE_KEY.split(String.raw`\n`).join("\n").replace(/"/g, "")
-      : "";
+    // Normalización de Resultado Principal (Columna E para Ranking)
+    // Priorizamos 'tiempo_final' si existe, si no el primer valor útil.
+    const primaryResult = results?.tiempo_final || Object.values(results || {}).find(v => !!v) || "--";
+    const dataString = JSON.stringify(results || {});
 
-    const auth = new google.auth.GoogleAuth({
-      credentials: {
-        client_email: process.env.GOOGLE_CLIENT_EMAIL,
-        private_key: privateKey,
-      },
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-    });
-
-    const sheetsService = google.sheets({ version: "v4", auth });
-
-    // Registro atómico en la hoja de 'Metricas'
-    await sheetsService.spreadsheets.values.append({
+    // Registro atómico (7 Columnas v15.0)
+    // [UUID, USER_ID, WOD_ID, NIVEL, RESULTADO, DATA_JSON, TIMESTAMP]
+    await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: "Metricas!A:E",
+      range: "Metricas!A:G",
       valueInputOption: "USER_ENTERED",
       requestBody: {
-        values: [
-          [
-            uuid,
-            userId,
-            wodId,
-            dataString,
-            timestamp,
-          ],
-        ],
+        values: [[uuid, userId, wodId, nivel, primaryResult, dataString, timestamp]],
       },
     });
 
-    return Response.json({ 
-      success: true, 
-      id: uuid,
-      timestamp: timestamp 
-    }, { status: 201 });
+    return NextResponse.json({ success: true, id: uuid, primaryResult }, { status: 201 });
 
   } catch (error: any) {
-    const googleError = error?.response?.data?.error?.message || error.message;
-    console.error("[CRITICAL_METRICS_ERROR]", googleError);
-
-    return Response.json(
-      { error: "Error en Persistencia de Datos", detalle: googleError },
+    console.error("[CRITICAL_METRICS_ERROR]", error.message);
+    return NextResponse.json(
+      { error: "Error en Persistencia de Datos", detalle: error.message },
       { status: 500 }
     );
   }

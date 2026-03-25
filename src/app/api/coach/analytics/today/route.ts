@@ -39,27 +39,41 @@ export async function GET() {
     const capMatch = descripcion.match(/(?:TIME CAP|CAP):\s*(\d{1,2}:\d{2})/i);
     const targetTimeSec = capMatch ? timeToSeconds(`${capMatch[1]}:00`) : 900; // Default 15 mins (900s)
 
-    // 4. Procesamiento de Métricas (Solo para este WOD)
+    // 3. Procesamiento de Métricas Segmentadas (v4.5 - Multi-Protocolo)
     const metricsRes = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Metricas!A:F",
+      range: "Metricas!A2:F3000",
     });
     const metricsRows = metricsRes.data.values || [];
 
-    const tiemposSegundos = metricsRows
-      .filter((row) => row[2] === id_wod)
-      .map((row) => timeToSeconds(row[3]))
-      .sort((a, b) => a - b);
+    // Filtrado por ID de WOD (Columna C / Indice 2)
+    const rawMetrics = metricsRows
+      .filter((row) => row[2]?.toString().trim() === id_wod.toString().trim())
+      .map((row) => {
+        try {
+          const results = JSON.parse(row[4] || "{}");
+          return {
+            segundos: timeToSeconds(results.tiempo_final || "00:00:00"),
+            modalidad: (row[3] || "SCALED").toUpperCase() // Columna D
+          };
+        } catch (e) {
+          return null;
+        }
+      })
+      .filter((m): m is { segundos: number; modalidad: string } => m !== null && m.segundos > 0)
+      .sort((a, b) => a.segundos - b.segundos);
 
-    if (tiemposSegundos.length === 0) {
+    if (rawMetrics.length === 0) {
       return NextResponse.json({ 
         message: "No hay registros registrados para el WOD de hoy todavía.",
         id_wod 
       }, { status: 200 });
     }
 
-    // 5. Cálculos Estadísticos
-    const count = tiemposSegundos.length;
+    const tiemposSegundos = rawMetrics.map(d => d.segundos);
+
+    // 5. Cálculos Estadísticos (Manteniendo compatibilidad)
+    const count = rawMetrics.length;
     const mean = tiemposSegundos.reduce((a, b) => a + b, 0) / count;
     const median = count % 2 === 0
       ? (tiemposSegundos[count / 2 - 1] + tiemposSegundos[count / 2]) / 2
@@ -69,19 +83,26 @@ export async function GET() {
     const stdDev = Math.sqrt(variance);
     const high_variance = stdDev > (mean * 0.2);
 
-    // 6. Generador de Histograma (Buckets)
+    // 6. Generador de Histograma por Niveles (Buckets Apilados)
     const minTime = tiemposSegundos[0];
     const maxTime = tiemposSegundos[count - 1];
-    const range = (maxTime - minTime) || 1;
+    const range = (maxTime - minTime) || 30; // Min 30s de rango para evitar divisiones por cero
     const bucketSize = range / 5;
 
     const histogram = Array.from({ length: 5 }, (_, i) => {
       const lower = minTime + i * bucketSize;
       const upper = lower + bucketSize;
-      const countBucket = tiemposSegundos.filter(t => t >= lower && (i === 4 ? t <= upper : t < upper)).length;
+      
+      const grupo = rawMetrics.filter(d => 
+        d.segundos >= lower && (i === 4 ? d.segundos <= upper : d.segundos < upper)
+      );
+
       return { 
         rango: `${Math.floor(lower / 60).toString().padStart(2, '0')}:${Math.floor(lower % 60).toString().padStart(2, '0')}`, 
-        atletas: countBucket 
+        RX: grupo.filter(d => d.modalidad === "RX").length,
+        SCALED: grupo.filter(d => d.modalidad === "SCALED").length,
+        NOVATO: grupo.filter(d => d.modalidad === "NOVATO").length,
+        total: grupo.length
       };
     });
 

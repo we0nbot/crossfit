@@ -1,71 +1,81 @@
-import { z } from "zod";
-import { google } from "googleapis";
 import { sheets } from "@/lib/google";
 import { NextResponse } from "next/server";
-
-// Esquema de validación para la creación de un WOD
-const WodSchema = z.object({
-  fecha: z.string().regex(/^\d{2}-\d{2}-\d{4}$/, "Formato DD-MM-YYYY requerido"),
-  titulo: z.string().min(3).max(100),
-  tipo: z.enum(["AMRAP", "EMOM", "FOR TIME", "TABATA", "PR"]),
-  descripcion: z.string().min(5),
-});
+import { revalidatePath } from "next/cache";
 
 /**
  * Endpoint POST para registrar un nuevo WOD en Google Sheets (Hoja 'WODs').
- * Permite la programación técnica desde el panel del coach.
+ * Diseño de Máxima Flexibilidad: Sin validaciones externas para agilizar la carga.
  */
 export async function POST(request: Request) {
   try {
-    // 1. Parseo y validación del payload
     const body = await request.json();
-    const result = WodSchema.safeParse(body);
+    
+    // 1. Params Extraction (Atómica de 11 Columnas)
+    const fecha = body.fecha || "00-00-0000";
+    const titulo = (body.titulo || "WOD SIN TÍTULO").trim();
+    const id_wod = body.id_wod || `WOD-${Date.now()}`;
+    const tipo = body.tipo || "AMRAP";
+    const descripcion = body.descripcion || "";
+    const config_timer = body.config_timer || "STOPWATCH";
+    const timer_value = body.timer_value || 0;
+    const input_schema = Array.isArray(body.input_schema) 
+       ? body.input_schema.join(",") 
+       : (body.input_schema || "tiempo");
+    const req_rx = body.req_rx || "";
+    const req_scaled = body.req_scaled || "";
+    const req_novato = body.req_novato || "";
 
-    if (!result.success) {
-      return NextResponse.json(
-        { error: "Validación fallida", detalles: result.error.issues },
-        { status: 400 }
-      );
-    }
-
-    const { fecha, titulo, tipo, descripcion } = result.data;
-
-    // 2. Generación de identificador único (Primary Key)
-    const id_wod = crypto.randomUUID();
-
-    // 3. Sanitización de descripción (Aplanar saltos de línea si es necesario para celdas simples o mantenerlos)
-    // Google Sheets acepta \n para saltos de línea internos en una celda
-    const sanitizedDescripcion = descripcion.trim();
-
-    // 4. Inserción técnica en Google Sheets (Hoja 'WODs', Rango A:E)
-    // Estructura: [ID, FECHA, TITULO, TIPO, DESCRIPCION]
-    await sheets.spreadsheets.values.append({
+    console.log(`[DEBUG_POST] Iniciando JOIN Técnico: ${titulo} (${id_wod})`);
+    
+    // A. Registro en Agenda (A:B)
+    const agendaPromise = sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SPREADSHEET_ID,
-      range: "WODs!A:E",
+      range: "Programacion!A:B",
       valueInputOption: "USER_ENTERED",
       requestBody: {
-        values: [[id_wod, fecha, titulo, tipo, sanitizedDescripcion]],
+        values: [[fecha, id_wod]],
+      },
+    });
+ 
+    // B. Registro en Biblioteca (A:K)
+    const libraryPromise = sheets.spreadsheets.values.append({
+      spreadsheetId: process.env.GOOGLE_SPREADSHEET_ID,
+      range: "WODs!A:K",
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [[
+          id_wod, 
+          fecha, 
+          titulo, 
+          tipo, 
+          descripcion, 
+          config_timer, 
+          timer_value, 
+          input_schema, 
+          req_rx, 
+          req_scaled, 
+          req_novato
+        ]],
       },
     });
 
-    return NextResponse.json(
-      { 
-        message: "WOD programado con éxito", 
-        id_wod,
-        fecha 
-      },
-      { status: 201 }
-    );
+    const [agendaRes, libraryRes] = await Promise.all([agendaPromise, libraryPromise]);
+    console.log(`[DEBUG_POST] Sincronización exitosa. Agenda=${agendaRes.data.updates?.updatedRange}, WODs=${libraryRes.data.updates?.updatedRange}`);
+
+    // 3. Invalidadación de Caché
+    revalidatePath("/dashboard");
+    revalidatePath("/api/wods/active");
+
+    return NextResponse.json({ 
+      success: true, 
+      message: "Publicación Industrial Completada: Agenda y Biblioteca sincronizadas.",
+      id_wod,
+      fecha 
+    }, { status: 201 });
 
   } catch (error: any) {
-    console.error("[API_ERROR_WOD_POST]", error.message);
-    
-    // Extracción profunda del error de Google API para depuración
+    console.error("[API_ERROR_WOD_POST_JOIN]", error.message);
     const googleError = error?.response?.data?.error?.message || error.message;
-    
-    return NextResponse.json(
-      { error: "Error al registrar el WOD en el servidor.", detalle: googleError },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error en el pipeline de datos.", detalle: googleError }, { status: 500 });
   }
 }

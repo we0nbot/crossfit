@@ -1,78 +1,51 @@
 import { NextResponse } from "next/server";
+import { sheets } from "@/lib/google";
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 /**
- * WOD Templates API - Catálogo maestro de Hero y Girl WODs.
- * Proporciona configuraciones técnicas precargadas para agilizar la programación del Box.
+ * WOD Templates API - Catálogo Maestro Sincronizado.
+ * Recupera todas las estructuras técnicas de la hoja 'WODs'.
  */
 export async function GET() {
-  const templates = [
-    // --- CATEGORÍA: HERO WODS ---
-    { 
-      id: 'h1', 
-      titulo: 'MURPH', 
-      descripcion: '1 Mile Run\n100 Pull-ups\n200 Push-ups\n300 Air Squats\n1 Mile Run', 
-      timerType: 'STOPWATCH', 
-      timerValue: 0, 
-      inputSchema: 'tiempo', 
-      category: 'HERO' 
-    },
-    { 
-      id: 'h2', 
-      titulo: 'DT', 
-      descripcion: '5 Rounds for Time:\n12 Deadlifts (155/105 lb)\n9 Hang Power Cleans (155/105 lb)\n6 Push Jerks (155/105 lb)', 
-      timerType: 'STOPWATCH', 
-      timerValue: 0, 
-      inputSchema: 'tiempo', 
-      category: 'HERO' 
-    },
-    { 
-      id: 'h3', 
-      titulo: 'WOD BULL', 
-      descripcion: '2 Rounds:\n200 Double-Unders\n50 Overhead Squats (135/95 lb)\n50 Pull-ups\n1 Mile Run', 
-      timerType: 'STOPWATCH', 
-      timerValue: 0, 
-      inputSchema: 'tiempo', 
-      category: 'HERO' 
-    },
+  try {
+    const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID;
+    
+    // 1. Obtener toda la Biblioteca Maestra (Lookup Masivo)
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "WODs!A2:L1000", // Ampliado por si hay categoría en col L
+    });
 
-    // --- CATEGORÍA: GIRL WODS ---
-    { 
-      id: 'g1', 
-      titulo: 'FRAN', 
-      descripcion: '21-15-9\nThrusters (95/65 lb)\nPull-ups', 
-      timerType: 'STOPWATCH', 
-      timerValue: 0, 
-      inputSchema: 'tiempo', 
-      category: 'GIRL' 
-    },
-    { 
-      id: 'g2', 
-      titulo: 'CINDY', 
-      descripcion: 'AMRAP 20\n5 Pull-ups\n10 Push-ups\n15 Air Squats', 
-      timerType: 'COUNTDOWN', 
-      timerValue: 1200, 
-      inputSchema: 'rondas,reps', 
-      category: 'GIRL' 
-    },
-    { 
-      id: 'g3', 
-      titulo: 'GRACE', 
-      descripcion: '30 Clean-and-Jerks for Time (135/95 lb)', 
-      timerType: 'STOPWATCH', 
-      timerValue: 0, 
-      inputSchema: 'tiempo', 
-      category: 'GIRL' 
-    },
-    { 
-      id: 'g4', 
-      titulo: 'GWEN', 
-      descripcion: 'Clean-and-Jerk 15-12-9 reps\nUnbroken. Rest as needed between sets.', 
-      timerType: 'STOPWATCH', 
-      timerValue: 0, 
-      inputSchema: 'peso', 
-      category: 'GIRL' 
-    }
-  ];
+    const allRows = res.data.values || [];
+    
+    // 2. Deduplicación por ID (Evita errores de 'Duplicate Key' en React)
+    const uniqueRows = Array.from(new Map(allRows.map(row => [row[0], row])).values());
+    
+    // 3. Mapeo Profesional de Hoja a Estructura de Datos
+    const templates = uniqueRows.map((row) => ({
+      id: row[0],
+      id_wod: row[0],
+      titulo: row[2] || "Sin Título",
+      tipo: row[3] || "AMRAP",
+      descripcion: row[4] || "",
+      timerType: (row[5] || "STOPWATCH").toUpperCase().trim(),
+      timerValue: parseInt(row[6]) || 0,
+      inputSchema: row[7] || "tiempo",
+      levels: {
+        rx: row[8] || "",
+        scaled: row[9] || "",
+        novato: row[10] || ""
+      },
+      // Si la columna L existe, es la categoría (HERO/GIRL). Fallback: GENERAL.
+      category: (row[11] || "GENERAL").toUpperCase()
+    }));
 
-  return NextResponse.json(templates);
+    return NextResponse.json(templates);
+
+  } catch (error: any) {
+    console.error("[TEMPLATES_SYNC_ERROR]", error.message);
+    return NextResponse.json({ error: "No se pudieron cargar las plantillas de la biblioteca." }, { status: 500 });
+  }
 }

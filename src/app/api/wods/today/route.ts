@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { sheets } from "@/lib/google";
 
-export const revalidate = 60; // Cache de 1 minuto para optimización en producción
+export const dynamic = 'force-dynamic'; 
 
 /**
  * Route Handler para obtener el WOD del día desde Google Sheets.
@@ -23,16 +23,16 @@ export async function GET(request: Request) {
     const targetDate = dateParam || formatter.format(new Date()).replace(/\//g, "-");
     const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID;
 
-    // 2. Consulta a Google Sheets (Pestaña 'WODs')
+    // 2. Consulta a Google Sheets (Pestaña 'WODs' - Rango Maestro A:K)
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "WODs!A:E", // Estructura: A:ID, B:FECHA, C:TITULO, D:TIPO, E:DESCRIPCION
+      range: "WODs!A:K", 
     });
 
     const rows = res.data.values || [];
     
-    // 3. Búsqueda del WOD por fecha (Columna B / Índice 1)
-    const wodFila = rows.find((row) => row[1] === targetDate);
+    // 3. Motor de Búsqueda de Última Versión
+    const wodFila = [...rows].reverse().find((row) => row[1] === targetDate);
 
     if (!wodFila) {
       return NextResponse.json(
@@ -45,12 +45,19 @@ export async function GET(request: Request) {
       );
     }
 
-    // 4. Mapeo seguro de datos
+    // 4. Mapeo seguro de datos (Arquitectura 11-Col Sincronizada)
     const wodData = {
+      id: wodFila[0] || "anon-wod",
       id_wod: wodFila[0] || "anon-wod",
       titulo: wodFila[2] || "Sin título",
       tipo: wodFila[3] || "N/A",
-      descripcion: wodFila[4] || "Sin descripción disponible.",
+      descripcion: wodFila[4] || "", // Columna E (Gral)
+      timer_type: wodFila[5] || "STOPWATCH", // Columna F
+      timer_value: parseInt(wodFila[6] || "0"), // Columna G
+      input_schema: wodFila[7] || "tiempo", // Columna H
+      req_rx: wodFila[8] || "Sin descripción RX.", // Columna I
+      req_scaled: wodFila[9] || "Sin descripción Scaled.", // Columna J
+      req_novato: wodFila[10] || "Sin descripción Novato." // Columna K
     };
 
     return NextResponse.json(wodData);

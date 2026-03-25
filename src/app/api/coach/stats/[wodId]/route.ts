@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { sheets } from "@/lib/google";
+import { timeToSeconds } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Dynamic Stats API (Atomic Rewrite / Fixed Schema)
- * Procesa métricas de CrossFit desde Google Sheets siguiendo el esquema:
- * Metricas: [id_metrica, nombre_usuario, id_usuario, id_wod (Col D), resultado (Col E), modalidad (Col F), fecha]
+ * Dynamic Stats API (v4.5 - Multi-Level Ready)
+ * Metricas: [UUID, UserID, WodID, Nivel, ResultsJSON, Timestamp]
  */
 export async function GET(
   request: Request,
@@ -16,44 +16,43 @@ export async function GET(
     const { wodId } = await params;
     const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID;
 
-    // 1. Obtención de métricas con rango extendido (Metricas!A2:G1000)
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Metricas!A2:G1000",
+      range: "Metricas!A2:F3000",
     });
 
     const rows = res.data.values || [];
     
-    // 2. Filtrado robusto (id_wod en Columna D / Index 3)
-    const registrosFiltrados = rows.filter((row) => {
-      const rowWodId = row[3]?.toString().trim();
-      return rowWodId === wodId.trim();
+    // 1. Filtrado por WOD (Columna C / Index 2)
+    const filteredRows = rows.filter(
+      (row: any[]) => row[2]?.toString().trim() === wodId.toString().trim()
+    );
+
+    const stats = {
+      rx: [] as number[],
+      scaled: [] as number[],
+      novato: [] as number[],
+    };
+
+    filteredRows.forEach((row: any[]) => {
+      try {
+        const modalidad = (row[3] || "SCALED").toUpperCase();
+        const results = JSON.parse(row[4] || "{}");
+        // Extraemos el tiempo final del JSON de resultados
+        const timeStr = results.tiempo_final || "00:00:00";
+        const seconds = timeToSeconds(timeStr);
+        
+        if (seconds > 0) {
+          if (modalidad === "RX") stats.rx.push(seconds);
+          else if (modalidad === "SCALED") stats.scaled.push(seconds);
+          else if (modalidad === "NOVATO") stats.novato.push(seconds);
+        }
+      } catch (e) {
+        console.warn("Fila corrupta omitida:", row[0]);
+      }
     });
 
-    if (registrosFiltrados.length === 0) {
-      return NextResponse.json(
-        { 
-          wodId,
-          mensaje: "No hay datos para este WOD",
-          histograma: [],
-          stats: { promedio: 0, total: 0 } 
-        }, 
-        { status: 200 }
-      );
-    }
-
-    // 3. Conversión de tiempo y sanitización (Columna E / Index 4)
-    const segundosArr = registrosFiltrados
-      .map((row) => {
-        const timeStr = row[4] || ""; // MM:SS:ms
-        const parts = timeStr.split(":").map(Number);
-        if (parts.length < 2 || parts.some(isNaN)) return null;
-        
-        const [min, sec, ms] = parts;
-        return min * 60 + sec + (ms || 0) / 100;
-      })
-      .filter((s): s is number => s !== null)
-      .sort((a, b) => a - b);
+    const segundosArr = [...stats.rx, ...stats.scaled, ...stats.novato].sort((a, b) => a - b);
 
     if (segundosArr.length === 0) {
       return NextResponse.json(
