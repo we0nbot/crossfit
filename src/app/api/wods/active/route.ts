@@ -86,20 +86,27 @@ export async function GET(request: Request) {
       return normalizeDate(row[0]) === targetDate;
     });
 
-    if (!scheduledRow) {
-      console.warn(`[DEBUG_WOD] No se encontró programación para: ${targetDate}`);
-      return NextResponse.json(
-        { error: `Sin programación para: ${targetDate}`, status: "REST_DAY", fecha: targetDate }, 
-        { status: 404 }
-      );
+    let targetWodId = scheduledRow ? scheduledRow[1]?.toString().trim().toUpperCase() : null;
+    let isRandomFallback = false;
+
+    // Lógica de Fallback Aleatorio (Si es hoy y no hay nada programado)
+    if ((!scheduledRow || !targetWodId) && targetDate === todayChile && libraryRows.length > 0) {
+      console.log(`[DEBUG_WOD] Activando Modo Aleatorio para: ${targetDate}`);
+      const randomIndex = Math.floor(Math.random() * libraryRows.length);
+      const randomWod = libraryRows[randomIndex];
+      targetWodId = randomWod[0]?.toString().trim().toUpperCase();
+      isRandomFallback = true;
     }
 
-    const targetWodId = scheduledRow[1]?.toString().trim().toUpperCase();
-
     if (!targetWodId) {
+      const isRestDay = scheduledRow && !scheduledRow[1];
       return NextResponse.json(
-        { error: `Día de descanso activo: ${targetDate}`, status: "REST_DAY", fecha: targetDate }, 
-        { status: 200 }
+        { 
+          error: isRestDay ? `Día de descanso activo: ${targetDate}` : `Sin programación para: ${targetDate}`, 
+          status: "REST_DAY", 
+          fecha: targetDate 
+        }, 
+        { status: isRestDay ? 200 : 404 }
       );
     }
 
@@ -126,9 +133,13 @@ export async function GET(request: Request) {
     const wodData = {
       id: libraryRow[0],
       id_wod: libraryRow[0],
-      titulo: libraryRow[2] || "Mantenimiento Técnico",
+      titulo: isRandomFallback 
+        ? `[Aleatorio] ${libraryRow[2] || "Mantenimiento Técnico"}` 
+        : (libraryRow[2] || "Mantenimiento Técnico"),
       tipo: libraryRow[3] || "AMRAP",
       descripcion: libraryRow[4] || "",
+      isRandom: isRandomFallback,
+      fecha: targetDate,
       config: {
         timerType: (libraryRow[5] || "STOPWATCH").toUpperCase().trim(),
         timerValue: parseInt(libraryRow[6]) || 0,
