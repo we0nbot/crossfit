@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Dumbbell, Activity, Apple } from "lucide-react";
-import Link from "next/link";
+import { Activity } from "lucide-react";
+import Navbar from "@/components/Navbar";
 import EliteTimer from "@/components/EliteTimer";
 import LevelSelector from "@/components/LevelSelector";
 import DynamicRegister from "@/components/DynamicRegister";
@@ -63,50 +63,7 @@ export default function AthleteDashboard() {
   return (
     <div className="min-h-screen bg-[#080808] text-white font-sans">
 
-      {/* ── HEADER ── */}
-      <header className="px-5 py-4 border-b border-[#1a1a1a] flex justify-between items-center bg-[#080808]/90 backdrop-blur-xl sticky top-0 z-50">
-        <div className="flex items-center gap-2.5">
-          <Dumbbell className="text-emerald-500 w-4 h-4" />
-          <span className="text-xl font-black italic uppercase tracking-tight">
-            Rorro<span className="text-emerald-500">Box</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/libre"
-            className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full hover:bg-emerald-500/20 transition-all group"
-          >
-            <Dumbbell className="w-3.5 h-3.5 text-emerald-500 group-hover:scale-110 transition-transform" />
-            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-500">
-              Libre
-            </span>
-          </Link>
-          <Link
-            href="/hipertrofia"
-            className="flex items-center gap-2 px-3 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-full hover:bg-cyan-500/20 transition-all group"
-          >
-            <Activity className="w-3.5 h-3.5 text-cyan-500 group-hover:scale-110 transition-transform" />
-            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-cyan-500">
-              Pump
-            </span>
-          </Link>
-          <Link
-            href="/nutricion"
-            className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full hover:bg-amber-500/20 transition-all group"
-          >
-            <Apple className="w-3.5 h-3.5 text-amber-500 group-hover:scale-110 transition-transform" />
-            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-amber-500">
-              Nutri
-            </span>
-          </Link>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#111] border border-[#222] rounded-full">
-            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-[#555]">
-              Live Session
-            </span>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="w-full max-w-md mx-auto flex flex-col">
 

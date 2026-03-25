@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
-import { Dumbbell, ArrowLeft, PlayCircle, X, Apple } from "lucide-react";
+import { PlayCircle, X } from "lucide-react";
+import Navbar from "@/components/Navbar";
 
 // --- MAPEADO TÉCNICO EXERCISEDB (GIFs) ---
 const EXERCISE_MAPPING: Record<string, string> = {
@@ -297,43 +297,7 @@ export default function HypertrophyPlan() {
 
   return (
     <div className="min-h-screen bg-[#080808] text-white font-sans">
-      {/* ── HEADER ── */}
-      <header className="px-5 py-4 border-b border-[#1a1a1a] flex justify-between items-center bg-[#080808]/90 backdrop-blur-xl sticky top-0 z-50">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="w-10 h-10 rounded bg-[#111] border border-[#222] flex items-center justify-center text-[#555] hover:text-emerald-500 hover:border-emerald-500/30 transition-all">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <span className="text-xl font-black italic uppercase tracking-tight">
-            Rorro<span className="text-emerald-500">Box</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link
-            href="/libre"
-            className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full hover:bg-emerald-500/20 transition-all group"
-          >
-            <Dumbbell className="w-3.5 h-3.5 text-emerald-500 group-hover:scale-110 transition-transform" />
-            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-500">
-              Libre
-            </span>
-          </Link>
-          <Link
-            href="/nutricion"
-            className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full hover:bg-amber-500/20 transition-all group"
-          >
-            <Apple className="w-3.5 h-3.5 text-amber-500 group-hover:scale-110 transition-transform" />
-            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-amber-500">
-              Nutri
-            </span>
-          </Link>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#111] border border-[#222] rounded-full">
-            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-[#555]">
-              Hipertrofia PRO
-            </span>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="w-full max-w-md mx-auto flex flex-col">
         {/* ── HERO ── */}

@@ -1,8 +1,5 @@
-"use client";
-
 import React, { useState } from "react";
-import Link from "next/link";
-import { ArrowLeft, Apple, Dumbbell, Activity } from "lucide-react";
+import Navbar from "@/components/Navbar";
 
 // --- CALCULADORA DE MACROS (RorroBox Industrial) ---
 const MacroCalculator = () => {
@@ -96,43 +93,7 @@ const MacroCalculator = () => {
 export default function NutritionGuide() {
   return (
     <div className="min-h-screen bg-[#080808] text-gray-200 font-sans pb-20 selection:bg-amber-500/30">
-      {/* ── HEADER ── */}
-      <header className="px-5 py-4 border-b border-[#1a1a1a] flex justify-between items-center bg-[#080808]/90 backdrop-blur-xl sticky top-0 z-50">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="w-10 h-10 rounded bg-[#111] border border-[#222] flex items-center justify-center text-[#555] hover:text-emerald-500 hover:border-emerald-500/30 transition-all">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <span className="text-xl font-black italic uppercase tracking-tight text-white">
-            Rorro<span className="text-emerald-500">Box</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/libre"
-            className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full hover:bg-emerald-500/20 transition-all group"
-          >
-            <Dumbbell className="w-3.5 h-3.5 text-emerald-500 group-hover:scale-110 transition-transform" />
-            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-500">
-              Libre
-            </span>
-          </Link>
-          <Link
-            href="/hipertrofia"
-            className="flex items-center gap-2 px-3 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-full hover:bg-cyan-500/20 transition-all group"
-          >
-            <Activity className="w-3.5 h-3.5 text-cyan-500 group-hover:scale-110 transition-transform" />
-            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-cyan-500">
-              Pump
-            </span>
-          </Link>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full">
-            <Apple className="w-3.5 h-3.5 text-amber-500" />
-            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-amber-500">
-              Nutri
-            </span>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <div className="max-w-md mx-auto p-4 pt-8">
 
