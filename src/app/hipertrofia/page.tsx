@@ -108,8 +108,8 @@ const LoadCalculator = () => {
 
   const zones = [
     { label: "Fuerza pesada", reps: "4–6 reps", pct: 0.85 },
-    { label: "Hipertrofia",   reps: "8–10 reps", pct: 0.75, highlight: true },
-    { label: "Bombeo final",  reps: "12–15 reps", pct: 0.65 },
+    { label: "Hipertrofia", reps: "8–10 reps", pct: 0.75, highlight: true },
+    { label: "Bombeo final", reps: "12–15 reps", pct: 0.65 },
   ];
 
   return (
@@ -148,11 +148,10 @@ const LoadCalculator = () => {
             <button
               key={u}
               onClick={() => handleUnitToggle(u)}
-              className={`px-3 py-1.5 rounded text-xs font-black italic uppercase transition-all ${
-                unit === u
+              className={`px-3 py-1.5 rounded text-xs font-black italic uppercase transition-all ${unit === u
                   ? "bg-emerald-500 text-white"
                   : "text-[#555] hover:text-[#aaa]"
-              }`}
+                }`}
             >
               {u}
             </button>
@@ -166,11 +165,10 @@ const LoadCalculator = () => {
           {zones.map((z) => (
             <div
               key={z.label}
-              className={`rounded px-3 py-3 flex flex-col gap-1 border ${
-                z.highlight
+              className={`rounded px-3 py-3 flex flex-col gap-1 border ${z.highlight
                   ? "border-emerald-500 bg-emerald-500/10"
                   : "border-[#222] bg-[#111]"
-              }`}
+                }`}
             >
               <span className={`text-[9px] font-bold uppercase tracking-wider ${z.highlight ? "text-emerald-500" : "text-[#555]"}`}>
                 {z.label}
@@ -203,11 +201,10 @@ const TechnicalGuide = ({ exerciseName, isOpen, onToggle }: { exerciseName: stri
     <div className="mt-4">
       <button
         onClick={onToggle}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${
-          isOpen 
-            ? "bg-red-500/10 text-red-500 border border-red-500/20" 
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${isOpen
+            ? "bg-red-500/10 text-red-500 border border-red-500/20"
             : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20"
-        }`}
+          }`}
       >
         {isOpen ? <X className="w-3 h-3" /> : <PlayCircle className="w-3 h-3" />}
         {isOpen ? "Cerrar Guía" : "Guía Técnica"}
@@ -216,8 +213,8 @@ const TechnicalGuide = ({ exerciseName, isOpen, onToggle }: { exerciseName: stri
       {isOpen && (
         <div className="mt-4 rounded-xl overflow-hidden border border-[#222] bg-[#111] animate-in zoom-in-95 duration-200 aspect-square relative group">
           <div className="absolute inset-0 bg-emerald-500/5 pointer-events-none group-hover:bg-transparent transition-colors" />
-          <img 
-            src={gifUrl} 
+          <img
+            src={gifUrl}
             alt={exerciseName}
             className="w-full h-full object-cover scale-110 grayscale-[0.3] brightness-90 group-hover:grayscale-0 group-hover:scale-100 transition-all duration-500"
             loading="lazy"
@@ -285,10 +282,10 @@ const ExerciseCard = ({ ex, index, isLast }: { ex: any, index: number, isLast: b
       </div>
 
       {/* Technical Guide Integration */}
-      <TechnicalGuide 
-        exerciseName={ex.name} 
-        isOpen={isGuideOpen} 
-        onToggle={() => setIsGuideOpen(!isGuideOpen)} 
+      <TechnicalGuide
+        exerciseName={ex.name}
+        isOpen={isGuideOpen}
+        onToggle={() => setIsGuideOpen(!isGuideOpen)}
       />
     </div>
   );
@@ -311,7 +308,7 @@ export default function HypertrophyPlan() {
           </span>
         </div>
         <div className="flex items-center gap-4">
-          <Link 
+          <Link
             href="/libre"
             className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full hover:bg-emerald-500/20 transition-all group"
           >
@@ -340,7 +337,7 @@ export default function HypertrophyPlan() {
           </div>
           <h1
             className="font-black italic uppercase text-white tracking-tight leading-[0.82]"
-            style={{ fontSize: "clamp(62px, 19vw, 82px)" }}
+            style={{ fontSize: "clamp(62px, 19vw, 62px)" }}
           >
             Hiper<span className="text-emerald-500">trofia</span>
           </h1>
@@ -376,11 +373,10 @@ export default function HypertrophyPlan() {
               <button
                 key={day.id}
                 onClick={() => setActiveTab(day.id)}
-                className={`flex-shrink-0 px-4 py-2.5 rounded text-xs font-black italic uppercase tracking-wide transition-all duration-150 ${
-                  activeTab === day.id
+                className={`flex-shrink-0 px-4 py-2.5 rounded text-xs font-black italic uppercase tracking-wide transition-all duration-150 ${activeTab === day.id
                     ? "bg-emerald-500 text-white"
                     : "bg-[#111] border border-[#222] text-[#555] hover:text-[#aaa] hover:border-[#333]"
-                }`}
+                  }`}
               >
                 {day.dayName}
               </button>
@@ -411,11 +407,11 @@ export default function HypertrophyPlan() {
         {/* ── EXERCISES ── */}
         <section className="px-5 pt-6 pb-20 space-y-0">
           {currentDay.exercises.map((ex, index) => (
-            <ExerciseCard 
-              key={`${activeTab}-${index}`} 
-              ex={ex} 
-              index={index} 
-              isLast={index === currentDay.exercises.length - 1} 
+            <ExerciseCard
+              key={`${activeTab}-${index}`}
+              ex={ex}
+              index={index}
+              isLast={index === currentDay.exercises.length - 1}
             />
           ))}
         </section>
